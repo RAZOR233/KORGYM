@@ -1,0 +1,6 @@
+ep-20250401140018-cbzqh_16-jiafa_level4: 0.46
+gemini-2.0-flash-001_16-jiafa_level4: 0.06
+claude-3-7-sonnet-20250219_16-jiafa_level4: 0.06
+gpt-4o-2024-11-20_16-jiafa_level4: 0.0
+ep-20250226145008-h97kr_16-jiafa_level4: 0.0
+ep-20250401140118-pm65m_16-jiafa_level4: 0.68

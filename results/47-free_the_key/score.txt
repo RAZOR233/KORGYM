@@ -1,0 +1,6 @@
+ep-20250226145008-h97kr_47-free_the_key_level4: 0.05
+DeepSeek-R1-Distill-Qwen-32B_47-free_the_key_level4: 0.7
+DeepSeek-R1-Distill-Llama-70B_47-free_the_key_level4: 0.6
+gemini-2.0-flash-001_47-free_the_key_level4: 0.05
+claude-3-7-sonnet-20250219_47-free_the_key_level4: 0.2
+gpt-4o-2024-11-20_47-free_the_key_level4: 0.3

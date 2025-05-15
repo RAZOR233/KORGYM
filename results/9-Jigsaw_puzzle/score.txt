@@ -1,0 +1,4 @@
+ep-20250302184817-nv9t8_9-Jigsaw_puzzle_level4: 0.12966666666666668
+claude-3-7-sonnet-20250219_9-Jigsaw_puzzle_level4: 0.009000000000000001
+gemini-2.0-flash-001_9-Jigsaw_puzzle_level4: 0.12769444444444444
+gpt-4o-2024-11-20_9-Jigsaw_puzzle_level4: 0.08497222222222221

@@ -1,0 +1,6 @@
+ep-20250226145008-h97kr_24-snake_level4: 1.8
+gpt-4o-2024-11-20_24-snake_level4: 0.6
+ep-20250401140018-cbzqh_24-snake_level4: 4.25
+claude-3-7-sonnet-20250219_24-snake_level4: 6.9
+gemini-2.0-flash-001_24-snake_level4: 2.05
+ep-20250401140118-pm65m_24-snake_level4: 16.5

@@ -1,0 +1,8 @@
+ep-20250226145008-h97kr_42-diagram_coloring_level4: 0.0
+ep-20250226145008-h97kr_42-diagram_coloring_level4: 0.0
+ep-20250226145008-h97kr_42-diagram_coloring_level4: 0.06
+claude-3-7-sonnet-20250219_42-diagram_coloring_level4: 0.2
+gemini-2.0-flash-001_42-diagram_coloring_level4: 0.08
+gpt-4o-2024-11-20_42-diagram_coloring_level4: 0.02
+ep-20250401140018-cbzqh_42-diagram_coloring_level4: 0.14
+ep-20250401140118-pm65m_42-diagram_coloring_level4: 0.94
