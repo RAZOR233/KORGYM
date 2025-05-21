@@ -1,0 +1,10 @@
+ep-20250226145008-h97kr_4-SudoKu_level4: 0.12
+Qwen2.5-72B-Instruct_4-SudoKu_level4: 0.0
+DeepSeek-R1-Distill-Llama-70B_4-SudoKu_level4: 0.18
+DeepSeek-R1-Distill-Qwen-32B_4-SudoKu_level4: 0.2
+ep-20250401140018-cbzqh_4-SudoKu_level4: 0.02
+claude-3-7-sonnet-20250219_4-SudoKu_level4: 0.14
+gpt-4o-2024-11-20_4-SudoKu_level4: 0.06
+ep-20250401140118-pm65m_4-SudoKu_level4: 1.84
+gemini-2.0-flash-001_4-SudoKu_level4: 0.16
+ep-20250401140118-pm65m_4-SudoKu_level4: 0.42

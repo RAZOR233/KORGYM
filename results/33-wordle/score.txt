@@ -1,0 +1,8 @@
+ep-20250226145008-h97kr_33-wordle_level4: 0.0
+ep-20250226145008-h97kr_33-wordle_level4: 0.15
+ep-20250226145008-h97kr_33-wordle_level4: 0.1
+claude-3-7-sonnet-20250219_33-wordle_level4: 0.25
+gemini-2.0-flash-001_33-wordle_level4: 0.25
+gpt-4o-2024-11-20_33-wordle_level4: 0.4
+ep-20250401140118-pm65m_33-wordle_level4: 0.6
+

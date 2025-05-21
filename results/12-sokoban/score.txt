@@ -1,0 +1,8 @@
+ep-20250226145008-h97kr_12-sokoban_level4: 0.0
+DeepSeek-R1-Distill-Qwen-32B_12-sokoban_level4: 0.16
+DeepSeek-R1-Distill-Llama-70B_12-sokoban_level4: 0.32
+claude-3-7-sonnet-20250219_12-sokoban_level4: 0.02
+ep-20250401140018-cbzqh_12-sokoban_level4: 0.08
+gpt-4o-2024-11-20_12-sokoban_level4: 0.04
+gemini-2.0-flash-001_12-sokoban_level4: 0.0
+ep-20250401140118-pm65m_12-sokoban_level4: 0.44

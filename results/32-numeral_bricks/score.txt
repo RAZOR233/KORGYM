@@ -1,0 +1,8 @@
+ep-20250226145008-h97kr_32-numeral_bricks_level4: 0.0
+claude-3-7-sonnet-20250219_32-numeral_bricks_level4: 0.0
+gemini-2.0-flash-001_32-numeral_bricks_level4: 0.0
+gpt-4o-2024-11-20_32-numeral_bricks_level4: 0.0
+ep-20250401140118-pm65m_32-numeral_bricks_level4: 0.02
+ep-20250401140018-cbzqh_32-numeral_bricks_level4: 0.26
+ep-20250401140018-cbzqh_32-numeral_bricks_level4: 0.0
+ep-20250401140118-pm65m_32-numeral_bricks_level4: 0.02

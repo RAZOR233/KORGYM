@@ -1,0 +1,6 @@
+ep-20250226145008-h97kr_18-alien_level4: 0.2
+claude-3-7-sonnet-20250219_18-alien_level4: 0.34
+ep-20250401140018-cbzqh_18-alien_level4: 0.26
+ep-20250401140118-pm65m_18-alien_level4: 0.74
+gemini-2.0-flash-001_18-alien_level4: 0.16
+gpt-4o-2024-11-20_18-alien_level4: 0.14

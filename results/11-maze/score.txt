@@ -1,0 +1,9 @@
+DeepSeek-R1-Distill-Llama-70B_11-maze_level4: 0.0(30~100)
+DeepSeek-R1-Distill-Qwen-32B_11-maze_level4: 0.38(10~30)
+DeepSeek-R1-Distill-Llama-70B_11-maze_level4: 0.36(10~30)
+ep-20250226145008-h97kr_11-maze_level4: 0.0
+gpt-4o-2024-11-20_11-maze_level4: 0.02
+gemini-2.0-flash-001_11-maze_level4: 0.02
+claude-3-7-sonnet-20250219_11-maze_level4: 0.02
+ep-20250401140018-cbzqh_11-maze_level4: 0.38
+ep-20250401140118-pm65m_11-maze_level4: 0.6
