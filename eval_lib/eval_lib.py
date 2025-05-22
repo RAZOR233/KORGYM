@@ -1,29 +1,40 @@
+# eval/eval.py
+
+#Standard libraries
 import asyncio
 import logging
 import os
 import json
 import uuid
+#Commonly used open-source libraries
 import requests
 from requests.exceptions import HTTPError
-
 from tqdm import tqdm
 from openai import OpenAI
 import torch
 import numpy as np
 import pandas as pd
 import openai
+#Project-specific libraries 
 
+#Configure logging: set the log level and output format
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 MAX_RETRY = 2
 
 def llama_process_sync(prompt, model_name, client, base64_image=None):
     """
-    同步请求，支持:
-     - 如果 model_name 为 gcp-claude37-sonnet-thinking，走专门的 ByteDance thinking API，
-       同时支持多模态（文本+图片）请求，使用与 Anthropic 示例一致的消息体格式
-     - 否则沿用原有 OpenAI/AzureOpenAI 客户端逻辑
+    Synchronous processing of prompts using different LLM APIs.
+
+    Args:
+        prompt (str): The user prompt to send to the model.
+        model_name (str): The name of the model being queried.
+        client (object): An instantiated client for OpenAI/Azure/GCP API access.
+        base64_image (str, optional): A base64-encoded image string for multimodal models.
+
+    Returns:
+        str: The combined response of reasoning (if available) and textual content from the model.
     """
-    # —— 专门分支：gcp-claude37-sonnet-thinking —— #
+
     if model_name == "gcp-claude37-sonnet-thinking":
         url = client.base_url if hasattr(client, 'base_url') else client.azure_endpoint
         headers = {
@@ -31,7 +42,7 @@ def llama_process_sync(prompt, model_name, client, base64_image=None):
             "X-TT-LOGID": str(uuid.uuid4()),
             "caller": "liniuniu",
         }
-        # 构造多模态消息体，匹配 Anthropic 示例：直接在 content 中使用 source 字段
+
         if base64_image:
             content = [
                 {
@@ -64,7 +75,7 @@ def llama_process_sync(prompt, model_name, client, base64_image=None):
             ],
             "thinking": {"type": "enabled", "budget_tokens": 10000},
         }
-        # 打印请求体便于调试
+
         logging.error(f"Request payload: {json.dumps(payload, ensure_ascii=False)}")
         try:
             resp = requests.post(
@@ -76,7 +87,6 @@ def llama_process_sync(prompt, model_name, client, base64_image=None):
             )
             resp.raise_for_status()
             data = resp.json()
-            # 如果顶层有分段 content，则拼接 thinking + text
             segments = data.get("content")
             if isinstance(segments, list):
                 thinking = "".join(
@@ -91,9 +101,7 @@ def llama_process_sync(prompt, model_name, client, base64_image=None):
                 )
                 return thinking + text
 
-            # 否则退回到 choices 里的消息
             msg = data["choices"][0]["message"]
-            # 有时 thinking 字段就在 message 里
             thinking = msg.get("thinking", "") or msg.get("reasoning_content", "")
             content = msg.get("content", "")
             return thinking + content
@@ -107,7 +115,6 @@ def llama_process_sync(prompt, model_name, client, base64_image=None):
             logging.exception("ByteDance API request failed")
             return ""
 
-    # —— 其他模型走原逻辑 —— #
     for attempt in range(1, MAX_RETRY + 1):
         try:
             if base64_image:
@@ -144,7 +151,6 @@ def llama_process_sync(prompt, model_name, client, base64_image=None):
                         model=model_name,
                         messages=[{"role": "user", "content": prompt}]
                     )
-            # —— 统一返回逻辑，优先拼接 reasoning_content —— #
             choice = chat_response.choices[-1].message
             reasoning = getattr(choice, "reasoning_content", None)
             if reasoning:
@@ -163,11 +169,20 @@ def llama_process_sync(prompt, model_name, client, base64_image=None):
 
 async def llama_process(prompt, model_name, address, key, base64_image=None):
     """
-    异步包装，根据地址判断使用 AzureOpenAI 还是 OpenAI，
-    以及上面同步逻辑中对 thinking 模型的特殊处理。
+    Asynchronous wrapper for LLM inference. Initializes appropriate client based on endpoint type,
+    and delegates the inference logic to the synchronous function `llama_process_sync`.
+
+    Args:
+        prompt (str): The user prompt to send to the model.
+        model_name (str): The name of the model being queried.
+        address (str): The API endpoint or base URL.
+        key (str): The API key or access token.
+        base64_image (str, optional): A base64-encoded image string for multimodal models.
+
+    Returns:
+        str: The model’s response, including optional reasoning content.
     """
     if model_name == "gcp-claude37-sonnet-thinking":
-        # 构造一个“伪客户端”来携带 base_url 和 api_key（AK）
         class _BDClient:
             def __init__(self, base_url, ak):
                 self.base_url = base_url
@@ -194,6 +209,20 @@ async def llama_process(prompt, model_name, address, key, base64_image=None):
     )
 
 async def predict(item_list, sem, model_name, address, key):
+    """
+    Asynchronously processes a list of input prompts with limited concurrency using a semaphore.
+    Collects and appends model responses to each input item.
+
+    Args:
+        item_list (List[dict]): List of items with prompts and optionally base64 images.
+        sem (asyncio.Semaphore): A semaphore to control concurrency.
+        model_name (str): The name of the model to be queried.
+        address (str): The API endpoint or base URL.
+        key (str): The API key or access token.
+
+    Returns:
+        List[dict]: The input list updated with model responses under the "response" key.
+    """
     with tqdm(total=len(item_list),
               desc="Generating predictions......",
               leave=True,
@@ -220,6 +249,20 @@ async def predict(item_list, sem, model_name, address, key):
     return item_list
 
 def save_process(item_list, output_dir, file_name):
+    """
+    Saves the processed results and their scores to disk. Also logs average score,
+    strips base64 images for storage, and removes checkpoint files if they exist.
+
+    Args:
+        item_list (List[dict]): List of processed items with responses and scores.
+        output_dir (str): The directory where results will be saved.
+        file_name (str): The base name for the output file (without extension).
+
+    Side Effects:
+        - Writes `.json` and `.txt` files to `output_dir`.
+        - Deletes intermediate checkpoint files.
+    """
+
     for item in item_list:
         item['have_image'] = bool(item.get('base64_image'))
         item['base64_image'] = ""

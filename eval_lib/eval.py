@@ -1,21 +1,25 @@
 # eval/eval.py
+
+#Standard libraries
 import asyncio
 import os
 import logging
 import re
-import random
 import requests
 import json
 
+#Commonly used open-source libraries
 import pandas as pd
 from tqdm import tqdm
-import tiktoken
 
+#Project-specific libraries 
 from .utils import parse_init
 from .eval_lib import predict, save_process
 
+#Configure logging: set the log level and output format
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+#Judge game playing epoch
 game_dict = {
     '1-DateCount':'single','2-GuessWord':'single','3-2048':'multiple','4-SudoKu':'single',
     '5-light_out_game':'single','8-word_puzzle':'single','9-Jigsaw_puzzle':'single',
@@ -29,14 +33,24 @@ game_dict = {
     '34-one_touch_drawing':'single','35-pipe_game':'single','36-CryptoWord':'multiple',
     '37-SpiderSolitaire':'multiple','38-minesweeper':'multiple','39-Nullify':'multiple',
     '40-CircleTheCat-Text':'multiple','41-PVZ':'multiple','42-diagram_coloring':'single',
-    '43-CircleTheCat-Multimodal':'multiple','44-city':'single','47-free_the_key':'multiple',
+    '43-CircleTheCat-Multimodal':'multiple','44-city':'single','45-free_the_key':'multiple',
     '48-map_position_simulation_text':'single','49_map_position_simulation_multimodal':'single',
     '50-SudoKu_MultiModal':'single','51-ball_arrange_multimodal':'multiple',
-    '52-wordle_multimodal':'multiple','53-Arrow-pathway':'single','54-jiafa_multimodal':'single','55-LongCat':'single',
-    '56-black_white_copy':'single'
+    '46-wordle_multimodal':'multiple','14-Arrow-pathway':'single','47-jiafa_multimodal':'single','6-LongCat':'single',
+    '7-black_white_copy':'single'
 }
 
 def normalize_response(response: str) -> str:
+    """
+    Cleans up the response string by removing LaTeX formatting and special characters
+    that may interfere with answer extraction.
+
+    Args:
+        response (str): The raw output string from the model.
+
+    Returns:
+        str: A simplified and normalized version of the response.
+    """
     return (
         response.replace("**", "")
                 .replace("$\\boxed{", "")
@@ -54,6 +68,16 @@ def normalize_response(response: str) -> str:
     )
 
 def get_prompt0_response(ori_answer):
+    """
+    Extracts the final answer from a model's response by locating the last occurrence
+    of the word 'Answer' and capturing the corresponding value.
+
+    Args:
+        ori_answer (str): The original model response string.
+
+    Returns:
+        str: The extracted answer string (or empty string if not found).
+    """
     if ori_answer is None:
         return ""
     gen = normalize_response(ori_answer)
@@ -66,12 +90,44 @@ def get_prompt0_response(ori_answer):
     return match[-1] if match else ""
 
 def generate(url, seed, level=4):
+    """
+    Sends a POST request to the game server to generate a new game instance.
+
+    Args:
+        url (str): The base URL of the game server.
+        seed (int): Random seed to control instance generation.
+        level (int): The game difficulty level.
+
+    Returns:
+        dict: The generated game instance.
+    """
     return requests.post(f"{url}/generate", json={"seed": seed}).json()
 
 def print_board(url, item):
+    """
+    Requests the visual or textual representation of the current game state.
+
+    Args:
+        url (str): The game server URL.
+        item (dict): Game state input.
+
+    Returns:
+        str: The board state in string format (text-based rendering).
+    """
     return requests.post(f"{url}/print_board", json=item).json()['board']
 
 def verify(url, item):
+    """
+    Verifies the correctness of a model's action using the server's verification API.
+    If verification fails, sets the score to 0.
+
+    Args:
+        url (str): The game server URL.
+        item (dict): The game item containing model's response/action.
+
+    Returns:
+        dict: The updated item with verification result and score.
+    """
     try:
         resp = requests.post(f"{url}/verify", json=item, timeout=30)
         resp.raise_for_status()
@@ -81,6 +137,20 @@ def verify(url, item):
     return item
 
 async def eval_single_file(output_dir, model_name, address, key, sem, game_name, level, url):
+    """
+    Evaluates a single-step game (non-interactive) by generating prompts,
+    collecting model responses, verifying actions, and saving results.
+
+    Args:
+        output_dir (str): Directory to store results.
+        model_name (str): The model name to evaluate.
+        address (str): The API endpoint.
+        key (str): The API key for authentication.
+        sem (asyncio.Semaphore): Concurrency limiter.
+        game_name (str): The name of the game.
+        level (int): The difficulty level.
+        url (str): The game server URL.
+    """
     checkpoint_dir = os.path.join(output_dir, game_name)
     os.makedirs(checkpoint_dir, exist_ok=True)
     ckpt = os.path.join(checkpoint_dir, f"{model_name}_{game_name}_level{level}_checkpoint.jsonl")
@@ -121,6 +191,20 @@ async def eval_single_file(output_dir, model_name, address, key, sem, game_name,
     logging.info(f"Complete the evaluation of the file: {file_name}")
 
 async def eval_file(output_dir, model_name, address, key, sem, game_name, level, url):
+    """
+    Evaluates a multi-turn game (interactive) by performing up to 100 rounds of 
+    prediction and environment updates, using checkpointing for intermediate saving.
+
+    Args:
+        output_dir (str): Directory to store results.
+        model_name (str): The model name to evaluate.
+        address (str): The API endpoint.
+        key (str): The API key for authentication.
+        sem (asyncio.Semaphore): Concurrency limiter.
+        game_name (str): The name of the game.
+        level (int): The difficulty level.
+        url (str): The game server URL.
+    """
     checkpoint_dir = os.path.join(output_dir, game_name)
     os.makedirs(checkpoint_dir, exist_ok=True)
     ckpt = os.path.join(checkpoint_dir, f"{model_name}_{game_name}_level{level}_checkpoint.json")
@@ -173,6 +257,11 @@ async def eval_file(output_dir, model_name, address, key, sem, game_name, level,
     logging.info(f"Complete the evaluation of the file: {file_name}")
 
 async def main():
+    """
+    The main entry point for evaluation. Parses command-line arguments,
+    determines whether the game is single-turn or multi-turn, and dispatches
+    the appropriate evaluation function.
+    """
     sem = asyncio.Semaphore(10)
     args = parse_init()
     if game_dict.get(args.game) == 'single':

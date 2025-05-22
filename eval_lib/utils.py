@@ -1,5 +1,5 @@
 # eval/utils.py
-# python自带的库
+#Standard libraries
 import argparse
 import logging
 import os
@@ -12,7 +12,14 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 def check_directory(path, mode):
     """
-    检查输入、输出目录是否存在
+    Check whether a directory exists and optionally create it.
+
+    Args:
+        path (str): Path to the directory.
+        mode (str): "i" for input (just check existence), "o" for output (create if not exists).
+
+    Returns:
+        bool: True if the directory exists or is successfully created (in output mode), False otherwise.
     """
     if not os.path.isdir(path) and mode == "o":
         os.makedirs(path)
@@ -25,7 +32,15 @@ def check_directory(path, mode):
 
 def check_file(path):
     """
-    检查输入文件是否存在
+    Check whether a given file exists. If the path is a directory or doesn't exist,
+    log an error and terminate the program.
+
+    Args:
+        path (str): Path to the input file.
+
+    Side Effects:
+        - Logs error if file is missing or if the path is a directory.
+        - Terminates the program using sys.exit(1) in case of invalid input.
     """
     if os.path.isdir(path):
         logging.error(f"Please add the -r argument to the command")
@@ -39,7 +54,18 @@ def check_file(path):
 
 def parse_init():
     """
-    定义并解析eval代码的命令行参数，配置日志记录，并检查输入的数据文件目录和输出的目录是否存在。
+    Parse command-line arguments for the evaluation script, set up logging, and
+    check whether the output directory exists (creating it if necessary).
+
+    Returns:
+        argparse.Namespace: Parsed command-line arguments, including:
+            - output (str): Output directory for saving evaluation results.
+            - model (str): Name of the model to evaluate.
+            - address (str): API address of the deployed model.
+            - key (str): API key for authentication.
+            - game (str): The name of the game to be evaluated.
+            - level (int): Difficulty level of the game.
+            - url (str): URL for the game environment server.
     """
     parser = argparse.ArgumentParser(description="Data creation utility")
 
@@ -49,19 +75,10 @@ def parse_init():
     parser.add_argument("-a", "--address", type=str, required=True, default="http://localhost:9002/v1", help="部署的大模型的地址")
     parser.add_argument("-k", "--key", type=str, required=True, default="EMPTY", help="API的key")
     parser.add_argument("-g", "--game", type=str, required=True, default="EMPTY", help="待测试的游戏")
-    parser.add_argument("-l", "--level", type=int, required=True, default="EMPTY", help="待测试的游戏")
+    parser.add_argument("-l", "--level", type=int, required=True, default="EMPTY", help="保留字段，待测试的游戏难度")
     parser.add_argument("-u", "--url", type=str, required=True, default="http://localhost:8775", help="环境交互的url")
     # 解析命令行参数
     args = parser.parse_args()
-
-    # if args.recursive:
-    #     if check_directory(args.input, "i"):
-    #         logging.info(f"Input directory: {os.path.abspath(args.input)}")
-    #     else:
-    #         logging.error(f"Input directory is not exists: {os.path.abspath(args.input)}")
-    #         sys.exit(1)
-    # else:
-    #     check_file(args.input)
 
     if check_directory(args.output, "o"):
         logging.info(f"Output directory: {os.path.abspath(args.output)}")
